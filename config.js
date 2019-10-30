@@ -28,7 +28,7 @@ const Configs = {
     ipfsApi: 'https://ipfs.staging.originprotocol.com',
     providerWs: `wss://eth-rinkeby.ws.alchemyapi.io/ws/${AlchemyKey}`,
     provider: `https://eth-rinkeby.alchemyapi.io/jsonrpc/${AlchemyKey}`,
-    paymentUrl: 'https://tst5.nick9.now.sh/api/test',
+    paymentUrl: 'https://origin-pay.herokuapp.com/pay',
     productUrl: 'https://data.ethswag.com/products/',
     marketplace: '0x3d608cce08819351ada81fc1550841ebc10686fd',
     fetchPastLogs: true

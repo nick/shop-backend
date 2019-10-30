@@ -22,6 +22,10 @@ console.log(config)
 
 app.use(cors({ origin: true, credentials: true }))
 
+app.get('/', (req, res) => {
+  res.send('')
+})
+
 app.post('/pay', bodyParser.json(), async (req, res) => {
   console.log('Trying to make payment...')
   const paymentIntent = await stripe.paymentIntents.create({
