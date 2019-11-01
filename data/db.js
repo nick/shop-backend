@@ -10,7 +10,7 @@ const Network = sequelize.define(
   {
     // attributes
     network_id: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
       unique: true
     },
     last_block: {
@@ -27,7 +27,7 @@ const Transactions = sequelize.define(
   {
     // attributes
     network_id: {
-      type: Sequelize.STRING,
+      type: Sequelize.INTEGER,
       unique: 'compositeIndex'
     },
     transaction_hash: {
