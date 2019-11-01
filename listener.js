@@ -1,7 +1,6 @@
 require('dotenv').config()
 const config = require('./config')()
 
-const fs = require('fs')
 const WebSocket = require('ws')
 const openpgp = require('openpgp')
 const Web3 = require('web3')
@@ -10,18 +9,15 @@ const abi = require('./_abi')
 const { getIpfsHashFromBytes32, getText } = require('./_ipfs')
 const netId = config.netId
 
-const prepareDb = require('./data/_prepare')
+const { Network, Transactions } = require('./data/db')
 const sendMail = require('./emailer')
-
-const Database = require('better-sqlite3')
-const dbOpt = { verbose: console.log }
-const db = new Database(`${__dirname}/data/${config.network}.db`, dbOpt)
 
 const web3 = new Web3()
 
 const Marketplace = new web3.eth.Contract(abi)
 const MarketplaceABI = Marketplace._jsonInterface
-const PrivateKey = fs.readFileSync(`${__dirname}/data/private-pgp.key`)
+const PrivateKey = process.env.PGP_PRIVATE_KEY
+const ListingId = process.env.LISTING_ID
 
 const SubscribeToLogs = JSON.stringify({
   jsonrpc: '2.0',
@@ -60,9 +56,10 @@ function connectWS() {
   console.log('Trying to connect...')
   ws = new WebSocket(config.providerWs)
 
-  const stmt = db.prepare('SELECT last_block FROM BlockTracker')
-  let { last_block: lastBlock } = stmt.get()
-  lastBlock = 5349781
+  let { last_block: lastBlock } = Network.findOne({
+    where: { network_id: netId }
+  })
+
   console.log(`Last recorded block: ${lastBlock}`)
 
   function heartbeat() {
@@ -127,8 +124,7 @@ const handleNewHead = head => {
   const timestamp = web3.utils.hexToNumber(head.timestamp)
   console.log(`New block ${number} timestamp: ${timestamp}`)
 
-  const sql = 'UPDATE BlockTracker SET last_block = ? WHERE network_id = ?'
-  db.prepare(sql).run(number, netId)
+  Network.upsert({ network_id: netId, last_block: number })
 
   return number
 }
@@ -140,26 +136,27 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
     return
   }
 
-  const selectTx = db.prepare(
-    'SELECT transaction_hash FROM Transactions WHERE transaction_hash = ?'
-  )
-  const existingTx = selectTx.get(transactionHash)
+  const existingTx = Transactions.findOne({
+    where: { transaction_hash: transactionHash }
+  })
   if (existingTx) {
     console.log('Already handled tx')
     return
   } else {
-    const insertTx = db.prepare(`INSERT INTO Transactions
-      (network_id, transaction_hash, block_number)
-      VALUES(?, ?, ?)
-    `)
-    insertTx.run(netId, transactionHash, web3.utils.hexToNumber(blockNumber))
+    Transactions.insert({
+      network_id: netId,
+      transaction_hash: transactionHash,
+      block_number: web3.utils.hexToNumber(blockNumber)
+    }).then(res => {
+      console.log(res)
+    })
   }
 
   const { name, inputs } = eventAbi
   const decoded = web3.eth.abi.decodeLog(inputs, data, topics.slice(1))
-  const { listingID, offerID, ipfsHash, party } = decoded
+  const { offerID, ipfsHash, party } = decoded
 
-  console.log(`${name} - ${listingID}-${offerID} by ${party}`)
+  console.log(`${name} - ${ListingId}-${offerID} by ${party}`)
   console.log(`IPFS Hash: ${getIpfsHashFromBytes32(ipfsHash)}`)
 
   try {
@@ -189,7 +186,7 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
 
     const plaintext = await openpgp.decrypt(options)
     const cart = JSON.parse(plaintext.data)
-    cart.offerId = `${netId}-001-${listingID}-${offerID}`
+    cart.offerId = `${ListingId}-${offerID}`
     cart.tx = transactionHash
     console.log(cart)
 
@@ -199,5 +196,4 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
   }
 }
 
-prepareDb(db, netId)
 connectWS()

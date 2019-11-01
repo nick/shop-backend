@@ -16,6 +16,7 @@ const ZeroAddress = '0x0000000000000000000000000000000000000000'
 
 const web3 = new Web3(config.provider)
 const account = web3.eth.accounts.wallet.add(process.env.WEB3_PK)
+const ListingId = process.env.LISTING_ID
 const Marketplace = new web3.eth.Contract(abi, config.marketplace)
 
 console.log(config)
@@ -65,7 +66,7 @@ app.post('/webhook', rawJson, async (req, res) => {
 
     const offer = {
       schemaId: 'https://schema.originprotocol.com/offer_2.0.0.json',
-      listingId: config.listingId,
+      listingId: ListingId,
       listingType: 'unit',
       unitsPurchased: 1,
       totalPrice: {

@@ -29,16 +29,22 @@ module.exports = () => `
     }
 
     .item-row .image {
-      width: 90px;
+      width: 75px;
     }
 
     .item-row .image img {
-      width: 70px;
+      width: 60px;
       border-radius: 10px;
     }
 
     .item-row .title {
       text-align: left;
+    }
+
+    .item-row .title .options {
+      color: #777;
+      font-size: 14px;
+      font-weight: normal;
     }
 
     .item-row .price {
@@ -66,7 +72,16 @@ module.exports = () => `
       border-top: 2px solid lightgrey;
       padding-top: 20px;
     }
-    @media (max-width: 600px) {
+  </mj-style>
+  <mj-style>
+    @media (max-width: 400px) {
+      .visit-store {
+        display: block;
+        margin-top: 1rem;
+      }
+      .view-order > div {
+        text-align: center !important;
+      }
     }
   </mj-style>
 </mj-head>

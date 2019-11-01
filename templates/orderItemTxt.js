@@ -1,1 +1,2 @@
-module.exports = vars => `${vars.title} × ${vars.quantity}: ${vars.price}`
+module.exports = vars =>
+  `${vars.title} × ${vars.quantity}: ${vars.price}${vars.options}`

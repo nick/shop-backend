@@ -20,10 +20,13 @@ module.exports = vars => `
             vars.firstName
           }, we're getting your order ready to be shipped. We will notify you when it has been sent.
         </mj-text>
-        <mj-text>
+        <mj-text css-class="view-order">
           <a href="${vars.orderUrl}" class="btn">
             View your order
-          </a> or <a href="${vars.storeUrl}">Visit our store</a>
+          </a>
+          <span class="visit-store">
+           or <a href="${vars.storeUrl}">Visit our store</a>
+          </span>
         </mj-text>
       </mj-column>
     </mj-section>

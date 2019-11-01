@@ -1,3 +1,5 @@
+require('dotenv').config()
+const config = require('./config')()
 const mjml2html = require('mjml')
 const nodemailer = require('nodemailer')
 const cartData = require('./cartData')
@@ -20,25 +22,41 @@ function formatPrice(num) {
   return `$${(num / 100).toFixed(2)}`
 }
 
-const prefix = process.env.EMAIL_ASSET_PREFIX
+const prefix = config.emailAssets
 
-async function sendMail(cart) {
+function optionsForItem(item) {
+  const options = []
+  if (item.product.options && item.product.options.length && item.variant) {
+    item.product.options.forEach((opt, idx) => {
+      options.push(`${opt}: ${item.variant.options[idx]}`)
+    })
+  }
+  return options
+}
+
+async function sendMail(cart, skip) {
   const items = await cartData(cart.items)
 
   const orderItems = items.map(item => {
     const img = item.variant.image || item.product.image
+    const options = optionsForItem(item)
     return orderItem({
       img: `${prefix}/${item.product.id}/520/${img}`,
       title: item.product.title,
       quantity: item.quantity,
-      price: formatPrice(item.price)
+      price: formatPrice(item.price),
+      options: options.length
+        ? `<div class="options">${options.join(', ')}</div>`
+        : ''
     })
   })
   const orderItemsTxt = items.map(item => {
+    const options = optionsForItem(item)
     return orderItemTxt({
       title: item.product.title,
       quantity: item.quantity,
-      price: formatPrice(item.price)
+      price: formatPrice(item.price),
+      options: options.length ? `\n(${options.join(', ')})` : ''
     })
   })
 
@@ -86,15 +104,18 @@ async function sendMail(cart) {
     html: htmlOutput.html,
     text: txtOutput
   }
-  // console.log(message)
 
-  transporter.sendMail(message, (err, msg) => {
-    if (err) {
-      console.log(err)
-    } else {
-      console.log(msg)
-    }
-  })
+  if (!skip) {
+    transporter.sendMail(message, (err, msg) => {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log(msg)
+      }
+    })
+  }
+
+  return message
 }
 
 module.exports = sendMail
