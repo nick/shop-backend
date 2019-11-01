@@ -56,11 +56,13 @@ function connectWS() {
   console.log('Trying to connect...')
   ws = new WebSocket(config.providerWs)
 
-  let { last_block: lastBlock } = Network.findOne({
+  let lastBlock
+  Network.findOne({
     where: { network_id: netId }
+  }).then(res => {
+    lastBlock = res.last_block
+    console.log(`Last recorded block: ${lastBlock}`)
   })
-
-  console.log(`Last recorded block: ${lastBlock}`)
 
   function heartbeat() {
     console.log('Got ping...')
@@ -135,15 +137,16 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
     console.log('Unknown event')
     return
   }
-
-  const existingTx = Transactions.findOne({
+  console.log('fetch existing...', transactionHash)
+  const existingTx = await Transactions.findOne({
     where: { transaction_hash: transactionHash }
   })
+  console.log('existing', existingTx)
   if (existingTx) {
     console.log('Already handled tx')
     return
   } else {
-    Transactions.insert({
+    Transactions.create({
       network_id: netId,
       transaction_hash: transactionHash,
       block_number: web3.utils.hexToNumber(blockNumber)
