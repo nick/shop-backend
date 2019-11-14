@@ -23,7 +23,7 @@ function formatPrice(num) {
   return `$${(num / 100).toFixed(2)}`
 }
 
-const prefix = config.emailAssets
+const prefix = config.siteData.emailAssets
 
 function optionsForItem(item) {
   const options = []
