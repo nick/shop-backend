@@ -4,11 +4,13 @@ const config = require('./config')()
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const basicAuth = require('express-basic-auth')
 const get = require('lodash/get')
 const bodyParser = require('body-parser')
 const stripe = require('stripe')(process.env.STRIPE_BACKEND)
 const Web3 = require('web3')
 const { post, getBytes32FromIpfsHash } = require('./_ipfs')
+const { Orders } = require('./data/db')
 
 const abi = require('./_abi')
 
@@ -19,12 +21,26 @@ const account = web3.eth.accounts.wallet.add(process.env.WEB3_PK)
 const ListingId = process.env.LISTING_ID
 const Marketplace = new web3.eth.Contract(abi, config.marketplace)
 
-console.log(config)
-
 app.use(cors({ origin: true, credentials: true }))
 
 app.get('/', (req, res) => {
   res.send('')
+})
+
+const auth = basicAuth({ users: { admin: process.env.ADMIN_PW } })
+
+app.get('/auth', auth, (req, res) => {
+  res.json({ success: true })
+})
+
+app.get('/orders', auth, async (req, res) => {
+  const orders = await Orders.findAll()
+  res.json(orders)
+})
+
+app.get('/orders/:id', auth, async (req, res) => {
+  const order = await Orders.findOne({ where: { order_id: req.params.id } })
+  res.json(order)
 })
 
 app.post('/pay', bodyParser.json(), async (req, res) => {

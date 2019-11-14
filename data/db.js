@@ -43,9 +43,33 @@ const Transactions = sequelize.define(
   }
 )
 
+const Orders = sequelize.define(
+  'orders',
+  {
+    order_id: {
+      type: Sequelize.STRING,
+      unique: true
+    },
+    // attributes
+    network_id: {
+      type: Sequelize.INTEGER
+    },
+    created_at: {
+      type: Sequelize.INTEGER
+    },
+    data: {
+      type: Sequelize.STRING
+    }
+  },
+  {
+    // options
+  }
+)
+
 sequelize.sync()
 
 module.exports = {
   Network,
-  Transactions
+  Transactions,
+  Orders
 }

@@ -9,7 +9,7 @@ const abi = require('./_abi')
 const { getIpfsHashFromBytes32, getText } = require('./_ipfs')
 const netId = config.netId
 
-const { Network, Transactions } = require('./data/db')
+const { Network, Transactions, Orders } = require('./data/db')
 const sendMail = require('./emailer')
 
 const web3 = new Web3()
@@ -17,6 +17,7 @@ const web3 = new Web3()
 const Marketplace = new web3.eth.Contract(abi)
 const MarketplaceABI = Marketplace._jsonInterface
 const PrivateKey = process.env.PGP_PRIVATE_KEY
+const PrivateKeyPass = process.env.PGP_PRIVATE_KEY_PASS
 const ListingId = process.env.LISTING_ID
 
 const SubscribeToLogs = JSON.stringify({
@@ -49,20 +50,22 @@ const GetPastLogs = ({ fromBlock, toBlock }) =>
   })
 
 let ws
-function connectWS() {
+async function connectWS() {
+  let lastBlock
+  const res = await Network.findOne({ where: { network_id: netId } })
+  if (res) {
+    lastBlock = res.last_block
+    console.log(`Last recorded block: ${lastBlock}`)
+  } else {
+    console.log('No recorded block found')
+  }
+
   if (ws) {
     ws.removeAllListeners()
   }
+
   console.log('Trying to connect...')
   ws = new WebSocket(config.providerWs)
-
-  let lastBlock
-  Network.findOne({
-    where: { network_id: netId }
-  }).then(res => {
-    lastBlock = res.last_block
-    console.log(`Last recorded block: ${lastBlock}`)
-  })
 
   function heartbeat() {
     console.log('Got ping...')
@@ -182,7 +185,7 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
 
     const privateKey = await openpgp.key.readArmored(PrivateKey)
     const privateKeyObj = privateKey.keys[0]
-    await privateKeyObj.decrypt('abc123')
+    await privateKeyObj.decrypt(PrivateKeyPass)
 
     const message = await openpgp.message.readArmored(encryptedData.data)
     const options = { message, privateKeys: [privateKeyObj] }
@@ -191,7 +194,16 @@ const handleLog = async ({ data, topics, transactionHash, blockNumber }) => {
     const cart = JSON.parse(plaintext.data)
     cart.offerId = `${ListingId}-${offerID}`
     cart.tx = transactionHash
+
     console.log(cart)
+
+    Orders.create({
+      order_id: cart.offerId,
+      network_id: netId,
+      data: JSON.stringify(cart)
+    }).then(() => {
+      console.log('Saved to DB OK')
+    })
 
     sendMail(cart)
   } catch (e) {

@@ -1,9 +1,3 @@
-// export function getBytes32FromIpfsHash(hash) {
-//   return hash;
-// }
-// export function getIpfsHashFromBytes32(bytes32Hex) {
-//   return bytes32Hex;
-// }
 const bs58 = require('bs58')
 const FormData = require('form-data')
 const fetch = require('node-fetch')

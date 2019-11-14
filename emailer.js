@@ -13,6 +13,7 @@ const transporter = nodemailer.createTransport({
 })
 
 const head = require('./templates/head')
+const vendor = require('./templates/vendor')
 const email = require('./templates/email')
 const emailTxt = require('./templates/emailTxt')
 const orderItem = require('./templates/orderItem')
@@ -62,17 +63,18 @@ async function sendMail(cart, skip) {
 
   const vars = {
     head,
-    siteName: 'Ethporeum',
-    supportEmailName: 'Ethereum Swag Store',
-    supportEmail: 'help@ethswag.com',
-    subject: '🦄🌈 Your Ethereum Swag!',
-    storeUrl: 'https://www.ethswag.com',
+    siteName: config.title,
+    supportEmailName: config.supportEmailName,
+    supportEmail: config.supportEmail,
+    subject: config.emailSubject,
+    storeUrl: config.storeUrl,
 
     orderNumber: cart.offerId,
     firstName: cart.userInfo.firstName,
     lastName: cart.userInfo.lastName,
     email: cart.userInfo.email,
-    orderUrl: `https://www.ethswag.com/#/order/${cart.tx}?auth=${cart.dataKey}`,
+    orderUrl: `${config.storeUrl}/#/order/${cart.tx}?auth=${cart.dataKey}`,
+    orderUrlAdmin: `${config.storeUrl}/#/admin/orders/${cart.offerId}`,
     orderItems,
     orderItemsTxt,
     subTotal: formatPrice(cart.subTotal),
@@ -94,6 +96,7 @@ async function sendMail(cart, skip) {
     paymentMethod: cart.paymentMethod.label
   }
 
+  const htmlOutputVendor = mjml2html(vendor(vars), { minify: true })
   const htmlOutput = mjml2html(email(vars), { minify: true })
   const txtOutput = emailTxt(vars)
 
@@ -105,8 +108,23 @@ async function sendMail(cart, skip) {
     text: txtOutput
   }
 
+  const messageVendor = {
+    from: `${vars.supportEmailName} <${vars.supportEmail}>`,
+    to: `${vars.supportEmailName} <${vars.supportEmail}>`,
+    subject: `[${vars.siteName}] Order #${cart.offerId}`,
+    html: htmlOutputVendor.html,
+    text: txtOutput
+  }
+
   if (!skip) {
     transporter.sendMail(message, (err, msg) => {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log(msg)
+      }
+    })
+    transporter.sendMail(messageVendor, (err, msg) => {
       if (err) {
         console.log(err)
       } else {
