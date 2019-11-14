@@ -58,7 +58,7 @@ const Orders = sequelize.define(
       type: Sequelize.INTEGER
     },
     data: {
-      type: Sequelize.STRING
+      type: Sequelize.TEXT
     }
   },
   {
