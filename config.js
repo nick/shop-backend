@@ -22,7 +22,6 @@ const Configs = {
     provider: 'http://localhost:8545',
     backend: 'http://localhost:3000',
     paymentUrl: 'http://localhost:3000/pay',
-    productUrl: 'http://localhost:8081/products/',
     emailAssets: 'https://www.ethswag.com/products',
     marketplace: localContractAddress
   },
@@ -34,7 +33,6 @@ const Configs = {
     provider: `https://eth-rinkeby.alchemyapi.io/jsonrpc/${AlchemyKey}`,
     paymentUrl: 'https://origin-pay.herokuapp.com/pay',
     backend: 'https://origin-pay.herokuapp.com',
-    productUrl: 'https://www.ethswag.com/products/',
     emailAssets: 'https://www.ethswag.com/products',
     marketplace: '0x3d608cce08819351ada81fc1550841ebc10686fd',
     fetchPastLogs: true
@@ -47,7 +45,6 @@ const Configs = {
     provider: `https://eth-mainnet.alchemyapi.io/jsonrpc/${AlchemyKey}`,
     paymentUrl: 'https://origin-pay.herokuapp.com',
     backend: '',
-    productUrl: '',
     emailAssets: 'https://www.ethswag.com/products',
     marketplace: '0x698ff47b84837d3971118a369c570172ee7e54c2',
     fetchPastLogs: true
