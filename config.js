@@ -1,7 +1,6 @@
 const network =
-  process.env.NETWORK || process.env.NODE_ENV === 'production'
-    ? 'rinkeby'
-    : 'localhost'
+  process.env.NETWORK ||
+  (process.env.NODE_ENV === 'production' ? 'rinkeby' : 'localhost')
 const site = process.env.SITE || 'ethereum'
 const AlchemyKey = process.env.ALCHEMY_KEY
 
