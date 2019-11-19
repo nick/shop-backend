@@ -63,6 +63,7 @@ const SiteData = {
   origin: {
     dataDir: 'origin',
     title: 'Swag',
+    fullTitle: 'Origin Swag',
     byline: 'Free shipping on all orders! 🚚💨',
     supportEmailName: 'Origin Swag',
     supportEmail: 'help@originswag.com',
@@ -88,7 +89,8 @@ const SiteData = {
     productUrl: 'https://www.ethswag.com/gitcoin/products/',
     emailAssets: 'https://www.ethswag.com/gitcoin/products',
     logo: 'logo.png',
-    contentHash: 'Qmf84u4XbZakxLPE7tDPXGW3ojYpKjYFrnyiBZ2F96yzuK'
+    css: 'style.css',
+    contentHash: 'QmTBTU8SmUbX32UHRmW13WviUE5wqMJBsW9V4RaVUBfKyP'
   },
   ethereum: {
     dataDir: 'ef',
@@ -101,7 +103,8 @@ const SiteData = {
     storeUrl: 'https://www.ethswag.com',
     productUrl: 'https://www.ethswag.com/products/',
     emailAssets: 'https://www.ethswag.com/products',
-    logo: 'logo.svg'
+    logo: 'logo.svg',
+    contentHash: 'QmNod6kFeaNMdtNxMBe3KVxtGKhpdQKzwoisfTVrSwiBW4'
   },
   ethhub: {
     dataDir: 'ethhub',

@@ -3,13 +3,13 @@ const config = require('./config')()
 const mjml2html = require('mjml')
 const nodemailer = require('nodemailer')
 const cartData = require('./cartData')
+const aws = require('aws-sdk')
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
+  SES: new aws.SES({
+    apiVersion: '2010-12-01',
+    region: 'us-east-1'
+  })
 })
 
 const head = require('./templates/head')
@@ -121,14 +121,14 @@ async function sendMail(cart, skip) {
       if (err) {
         console.log(err)
       } else {
-        console.log(msg)
+        console.log(msg.envelope)
       }
     })
     transporter.sendMail(messageVendor, (err, msg) => {
       if (err) {
         console.log(err)
       } else {
-        console.log(msg)
+        console.log(msg.envelope)
       }
     })
   }
